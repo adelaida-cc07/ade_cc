@@ -17,12 +17,12 @@
       <table class="table table-sm">
         <thead>
           <tr>
-            <th>Temperatura</th>
-            <th>Humedad</th>
-            <th>Fecha y Hora</th>
+            <th>Nombre_Apellido</th>
+            <th>Telefono</th>
+            <th>Fecha</th>
           </tr>
         </thead>
-        <tbody id="tbodyTemperaturaHumedad"></tbody>
+        <tbody id="tbodyReserva_Habitacion"></tbody>
       </table>
     </div>
 
@@ -39,11 +39,11 @@
                     $("#tbodyTemperaturaHumedad").html("")
 
                     for (var x in respuesta) {
-                        var temperaturaHumedad = respuesta[x]
-                        $("#tbodyTemperaturaHumedad").append(`<tr>
-                            <td>${temperaturaHumedad[1]}</td>
-                            <td>${temperaturaHumedad[2]}</td>
-                            <td>${temperaturaHumedad[3]}</td>
+                        var reserva_habitacion = respuesta[x]
+                        $("#tbodyReserva_Habitacion").append(`<tr>
+                            <td>${reserva_habitacion[1]}</td>
+                            <td>${reserva_habitacion[2]}</td>
+                            <td>${reserva_habitacion[3]}</td>
                         </tr>`)
                     }
                 })
@@ -53,15 +53,15 @@
 
             Pusher.logToConsole = true
             
-            var pusher = new Pusher("2df86616075904231311", {
+            var pusher = new Pusher("91998889612f4dcea6e7", {
                 cluster: "us2"
             })
 
             // Canal ---> Donde se concentran los hilos con los clientes conectados
-            var channel = pusher.subscribe("canalRegistrosTemperaturaHumedad");
+            var channel = pusher.subscribe("canalRegistrosHabitacion");
 
             // Evento --> El código que se accionará con la información enviada o el uso del canal
-            channel.bind("registroTemperaturaHumedad", function (temperaturaHumedad) {
+            channel.bind("eventoRegistrosHabitacion", function (reserva_habitacion) {
                 // 1. Notificar el evento
                 // alert("Ocurrió el evento")
 
