@@ -6,6 +6,7 @@ from flask import request
 import pusher
 
 import mysql.connector
+import datetime
 import pytz
 
 con = mysql.connector.connect(
@@ -21,23 +22,23 @@ app = Flask(__name__)
 def index():
     con.close()
 
-    return render_template("reserva_habitacion.html")
+    return render_template("app.html")
 
 # Ejemplo de ruta GET usando templates para mostrar una vista
-@app.route("/reserva_habitacion")
+@app.route("/alumnos")
 def alumnos():
     con.close()
 
-    return render_template("reserva_habitacion.html")
+    return render_template("alumnos.html")
 
 # Ejemplo de ruta POST para ver cómo se envia la informacion
-@app.route("/reserva_habitacion/guardar", methods=["POST"])
+@app.route("/alumnos/guardar", methods=["POST"])
 def alumnosGuardar():
     con.close()
+    matricula      = request.form["txtMatriculaFA"]
     nombreapellido = request.form["txtNombreApellidoFA"]
-     telefono     = request.form["txtTelefonoFA"]
 
-    return f"Nombre y Apellido {nombreapellido} Telefono {telefono}"
+    return f"Matrícula {matricula} Nombre y Apellido {nombreapellido}"
 
 # Código usado en las prácticas
 @app.route("/buscar")
@@ -46,14 +47,14 @@ def buscar():
         con.reconnect()
 
     cursor = con.cursor()
-    cursor.execute("SELECT * FROM tst0_reservas ORDER BY Id_Reserva DESC")
+    cursor.execute("SELECT * FROM sensor_log ORDER BY Id_Log DESC")
     registros = cursor.fetchall()
 
     con.close()
 
     return registros
 
-@app.route("/registrar", methods=["POST"])
+@app.route("/registrar", methods=["GET"])
 def registrar():
     args = request.args
 
@@ -62,21 +63,21 @@ def registrar():
 
     cursor = con.cursor()
 
-    sql = "INSERT INTO tst0_reservas (Nombre_ Apellido,Telefono, Fecha) VALUES (%s, %s, %s)"
-    val = (args["Nombre_Apellido"], args["Telefono"], datetime.datetime.now(pytz.timezone("America/Matamoros")))
+    sql = "INSERT INTO sensor_log (Temperatura, Humedad, Fecha_Hora) VALUES (%s, %s, %s)"
+    val = (args["temperatura"], args["humedad"], datetime.datetime.now(pytz.timezone("America/Matamoros")))
     cursor.execute(sql, val)
     
     con.commit()
     con.close()
 
     pusher_client = pusher.Pusher(
-        app_id = "1766039"
-        key = "91998889612f4dcea6e7"
-        secret = "b0b6a2508a63ef44c370"
-        cluster = "us2",
+        app_id="1714541",
+        key="2df86616075904231311",
+        secret="2f91d936fd43d8e85a1a",
+        cluster="us2",
         ssl=True
     )
 
-    pusher_client.trigger("canalRegistrosReserva", "registroeventoreserva", args)
+    pusher_client.trigger("canalRegistrosTemperaturaHumedad", "registroTemperaturaHumedad", args)
 
     return args
