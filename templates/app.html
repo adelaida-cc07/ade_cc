@@ -8,80 +8,77 @@
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
 
-    <title>Alumnos</title>
+    <title>App</title>
 </head>
 <body>
-    <!-- Nombre de la etiqueta Ejemplo: INPUT -->
-    <!-- # para ID -->
-    <!-- . para CLASS -->
-
-    <!-- form index 0 -->
-    <!-- #frmAlumnos -->
-    <!-- .formulario index 0 -->
     <div class="container">
-        <form method="post" id="frmAlumnos" class="formulario">
-            <div class="mb-1">
-                <label id="lblMatriculaFA" for="txtMatriculaFA">Matrícula:</label>
-                <input type="number" name="txtMatriculaFA" id="txtMatriculaFA" class="form-control" required="true" minlength="8" maxlength="8" data-rule-digits="true">
-            </div>
-            <div class="mb-1">
-                <label id="lblNombreApellidoFA" for="txtNombreApellidoFA">Nombre y Apellido:</label>
-                <input type="text" name="txtNombreApellidoFA" id="txtNombreApellidoFA" class="form-control" required="true" minlength="10" maxlength="25">
-            </div>
-            <div class="text-end">
-                <button id="btnGuardarFA" name="btnGuardarFA" class="btn btn-dark">Guardar</button>
-            </div>
-        </form>
-        <div id="divAlumnos"></div>
-    
-        <!-- table index 0 -->
-        <table class="table table-sm">
-            <thead>
-                <tr>
-                    <th>Matrícula</th>
-                    <th>Nombre y Apellido</th>
-                </tr>
-            </thead>
-            <tbody id="tbodyAlumnos"></tbody>
-        </table>
+      <table class="table table-sm">
+        <thead>
+          <tr>
+            <th>Temperatura</th>
+            <th>Humedad</th>
+            <th>Fecha y Hora</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyTemperaturaHumedad"></tbody>
+      </table>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
     <script>
         window.addEventListener("load", function (event) {
-            $("#frmAlumnos").validate({
-                messages: {
-                    txtMatriculaFA: {
-                        required: "Ingresa la matrícula",
-                        minlength: "La matrícula es de 8 digitos",
-                        maxlength: "La matrícula es de 8 digitos",
-                        digits: "La matrícula es de solo números"
-                    },
-                    txtNombreApellidoFA: {
-                        required: "Ingresa tu nombre y apellido",
-                        minlength: "Ingresa más o 10 caracteres",
-                        maxlength: "Ingresa menos o 25 caracteres"
+            // Realizamos un SELECT a la BD con FLASK y lo imprimimos en el TBODY
+            function buscar() {
+                $.get("/buscar", function (respuesta) {
+                    // Imprimimos la respuesta de FLASK con SELECT para saber cómo acceder a cada valor y colocarlos en el TBODY
+                    // console.log(respuesta)
+
+                    $("#tbodyTemperaturaHumedad").html("")
+
+                    for (var x in respuesta) {
+                        var temperaturaHumedad = respuesta[x]
+                        $("#tbodyTemperaturaHumedad").append(`<tr>
+                            <td>${temperaturaHumedad[1]}</td>
+                            <td>${temperaturaHumedad[2]}</td>
+                            <td>${temperaturaHumedad[3]}</td>
+                        </tr>`)
                     }
-                },
-                rules: {
-                    txtMatriculaFA: {
-                        // required: true,
-                        // minlength: 8,
-                        // maxlength: 8
-                        // digits: true
-                    }
-                }
+                })
+            }
+
+            buscar()
+
+            Pusher.logToConsole = true
+            
+            var pusher = new Pusher("2df86616075904231311", {
+                cluster: "us2"
             })
 
-            $("#frmAlumnos").submit(function (event) {
-                event.preventDefault()
+            // Canal ---> Donde se concentran los hilos con los clientes conectados
+            var channel = pusher.subscribe("canalRegistrosTemperaturaHumedad");
 
-                $.post("/alumnos/guardar", $(this).serialize(), function (respuesta) {
-                    console.log(respuesta)
-                })
+            // Evento --> El código que se accionará con la información enviada o el uso del canal
+            channel.bind("registroTemperaturaHumedad", function (temperaturaHumedad) {
+                // 1. Notificar el evento
+                // alert("Ocurrió el evento")
+
+                // 2. Recibir información enviada en el evento
+                // console.log(temperaturaHumedad)
+
+                // 3. Trabajar información enviada por el evento
+                /**
+                $("#tbodyTemperaturaHumedad").prepend(`<tr>
+                    <td>${temperaturaHumedad.temperatura}</td>
+                    <td>${temperaturaHumedad.humedad}</td>
+                    <td></td>
+                </tr>`)
+                */
+
+                // 4. Mandar a llamar otro código luego del evento
+                buscar()
             })
         })
     </script>    
