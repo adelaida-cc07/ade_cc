@@ -25,7 +25,7 @@ def index():
     return render_template("app.html")
 
 # Ejemplo de ruta GET usando templates para mostrar una vista
-@app.route("/alumnos")
+@app.route("/app")
 def alumnos():
     con.close()
 
