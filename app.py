@@ -20,8 +20,6 @@ app = Flask(__name__)
 
 @app.route("/")
 def index():
-    con.close()
-
     return render_template("app.html")
 
 # Ejemplo de ruta GET usando templates para mostrar una vista
@@ -64,15 +62,17 @@ def registrar():
     cursor = con.cursor()
 
     sql = "INSERT INTO tst0_reservas (Nombre_Apellido, Telefono, Fecha) VALUES (%s, %s, %s)"
+ 
     val = (args.get("name"), args.get("tel"), datetime.datetime.now(pytz.timezone("America/Matamoros")))
+ 
     cursor.execute(sql, val)
-    
     con.commit()
+ 
     cursor.close()
     con.close()
 
     pusher_client = pusher.Pusher(
-      app_id = "1766039"
+        app_id = "1766039"
         key = "91998889612f4dcea6e7"
         secret = "b0b6a2508a63ef44c370"
         cluster = "us2",
