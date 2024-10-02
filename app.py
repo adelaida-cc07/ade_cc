@@ -30,24 +30,16 @@ def alumnos():
     return render_template("app.html")
 
 # Ejemplo de ruta POST para ver cómo se envia la informacion
-@app.route("/app/guardar", methods=["POST"])
-def alumnosGuardar():
-    con.close()
-    matricula      = request.form["txtMatriculaFA"]
-    nombreapellido = request.form["txtNombreApellidoFA"]
-
-    return f"Matrícula {matricula} Nombre y Apellido {nombreapellido}"
 
 # Código usado en las prácticas
 @app.route("/buscar")
 def buscar():
     if not con.is_connected():
         con.reconnect()
-
     cursor = con.cursor()
     cursor.execute("SELECT * FROM tst0_reservas ORDER BY Id_Reserva DESC")
+ 
     registros = cursor.fetchall()
-
     con.close()
 
     return registros
