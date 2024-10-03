@@ -2,7 +2,8 @@ from flask
 import Flask, render_template, request, jsonify
 import pusher
 import mysql.connector
-from mysql.connector import pooling
+from mysql.connector
+import pooling
 import datetime
 import pytz
 import os
@@ -83,7 +84,7 @@ def registrar():
         pusher_client.trigger("canalRegistrosTemperaturaHumedad", "registroTemperaturaHumedad", {"temperatura": temperatura, "humedad": humedad})
 
         return jsonify({"temperatura": temperatura, "humedad": humedad}), 201
-    except mysql.connector.Error as err:
+        except mysql.connector.Error as err:
         return jsonify({"error": str(err)}), 500
     finally:
         cursor.close()
