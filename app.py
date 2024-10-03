@@ -1,76 +1,93 @@
- from flask import Flask
-
-from flask import render_template
-from flask import request
-
+from flask 
+import Flask, render_template, request, jsonify
 import pusher
-
 import mysql.connector
+from mysql.connector import pooling
 import datetime
 import pytz
+import os
 
-con = mysql.connector.connect(
-    host="185.232.14.52",
-    database="u760464709_tst_sep",
-    user="u760464709_tst_sep_usr",
-    password="dJ0CIAFF="
-)
+# Configuración de la conexión a la base de datos (usando un pool de conexiones)
+dbconfig = {
+    "host": os.getenv("DB_HOST", "185.232.14.52"),
+    "database": os.getenv("DB_NAME", "u760464709_tst_sep"),
+    "user": os.getenv("DB_USER", "u760464709_tst_sep_usr"),
+    "password": os.getenv("DB_PASSWORD", "dJ0CIAFF=")
+}
+connection_pool = mysql.connector.pooling.MySQLConnectionPool(pool_name="mypool", pool_size=5, **dbconfig)
 
 app = Flask(__name__)
+
+# Configuración de Pusher
+pusher_client = pusher.Pusher(
+    app_id=os.getenv("PUSHER_APP_ID", "1714541"),
+    key=os.getenv("PUSHER_KEY", "2df86616075904231311"),
+    secret=os.getenv("PUSHER_SECRET", "2f91d936fd43d8e85a1a"),
+    cluster=os.getenv("PUSHER_CLUSTER", "us2"),
+    ssl=True
+)
 
 @app.route("/")
 def index():
     return render_template("app.html")
 
 # Ejemplo de ruta GET usando templates para mostrar una vista
-@app.route("/app")
+@app.route("/alumnos")
 def alumnos():
-    con.close()
+    return render_template("alumnos.html")
 
-    return render_template("app.html")
+# Ejemplo de ruta POST para guardar la información
+@app.route("/alumnos/guardar", methods=["POST"])
+def alumnos_guardar():
+    matricula = request.form.get("txtMatriculaFA")
+    nombre_apellido = request.form.get("txtNombreApellidoFA")
 
-# Ejemplo de ruta POST para ver cómo se envia la informacion
+    if not matricula or not nombre_apellido:
+        return jsonify({"error": "Todos los campos son requeridos"}), 400
 
-# Código usado en las prácticas
+    return f"Matrícula {matricula} Nombre y Apellido {nombre_apellido}"
+
+# Código usado en las prácticas para obtener registros
 @app.route("/buscar")
 def buscar():
-    if not con.is_connected():
-        con.reconnect()
-    cursor = con.cursor()
-    cursor.execute("SELECT * FROM tst0_reservas ORDER BY Id_Reserva DESC")
- 
-    registros = cursor.fetchall()
-    con.close()
+    try:
+        connection = connection_pool.get_connection()
+        cursor = connection.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM sensor_log ORDER BY Id_Log DESC")
+        registros = cursor.fetchall()
+        return jsonify(registros)
+    except mysql.connector.Error as err:
+        return jsonify({"error": str(err)}), 500
+    finally:
+        cursor.close()
+        connection.close()
 
-    return registros
-
+# Ruta GET para registrar datos de temperatura y humedad
 @app.route("/registrar", methods=["GET"])
 def registrar():
-    args = request.args
+    temperatura = request.args.get("temperatura")
+    humedad = request.args.get("humedad")
 
-    if not con.is_connected():
-        con.reconnect()
+    if not temperatura or not humedad:
+        return jsonify({"error": "Temperatura y humedad son requeridos"}), 400
 
-    cursor = con.cursor()
+    try:
+        connection = connection_pool.get_connection()
+        cursor = connection.cursor()
+        sql = "INSERT INTO sensor_log (Temperatura, Humedad, Fecha_Hora) VALUES (%s, %s, %s)"
+        val = (temperatura, humedad, datetime.datetime.now(pytz.timezone("America/Matamoros")))
+        cursor.execute(sql, val)
+        connection.commit()
 
-    sql = "INSERT INTO tst0_reservas (Nombre_Apellido, Telefono, Fecha) VALUES (%s, %s, %s)"
- 
-    val = (args.get("name"), args.get("tel"), datetime.datetime.now(pytz.timezone("America/Matamoros")))
- 
-    cursor.execute(sql, val)
-    con.commit()
- 
-    cursor.close()
-    con.close()
+        # Disparar evento Pusher
+        pusher_client.trigger("canalRegistrosTemperaturaHumedad", "registroTemperaturaHumedad", {"temperatura": temperatura, "humedad": humedad})
 
-    pusher_client = pusher.Pusher(
-        app_id = "1766039"
-        key = "91998889612f4dcea6e7"
-        secret = "b0b6a2508a63ef44c370"
-        cluster = "us2",
-        ssl=True
-    )
+        return jsonify({"temperatura": temperatura, "humedad": humedad}), 201
+    except mysql.connector.Error as err:
+        return jsonify({"error": str(err)}), 500
+    finally:
+        cursor.close()
+        connection.close()
 
-    pusher_client.trigger("canalRegistrosHabitacion", "eventoRegistrosHabitacion", args)
-
-    return args
+if __name__ == "__main__":
+    app.run(debug=True)
