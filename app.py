@@ -12,7 +12,7 @@ con = mysql.connector.connect(
     password="dJ0CIAFF="
 )
 
-app = Flask(__main__)
+app = Flask(__name__)
 
 # Ruta de inicio
 @app.route("/")
