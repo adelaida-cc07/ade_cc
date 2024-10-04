@@ -1,55 +1,3 @@
-from flask import Flask, render_template, request, jsonify
-import pusher
-import mysql.connector
-import datetime
-import pytz
-
-# Conexión a la base de datos
-con = mysql.connector.connect(
-    host="185.232.14.52",
-    database="u760464709_tst_sep",
-    user="u760464709_tst_sep_usr",
-    password="dJ0CIAFF="
-)
-
-app = Flask(__name__)
-
-# Ruta de inicio
-@app.route("/")
-def index():
-    con.close()
-    return render_template("app.html")
-
-# Ruta para mostrar la vista de 'alumnos'
-@app.route("/app")
-def alumnos():
-    con.close()
-    return render_template("app.html")
-
-# Ruta POST para guardar información de alumnos (ejemplo)
-@app.route("/app/guardar", methods=["POST"])
-def alumnos_guardar():
-    con.close()
-    matricula = request.form.get("txtMatriculaFA")
-    nombreapellido = request.form.get("txtNombreApellidoFA")
-    return f"Matrícula {matricula} Nombre y Apellido {nombreapellido}"
-
-# Ruta para buscar registros de la tabla `tst0_reservas`
-@app.route("/buscar")
-def buscar():
-    try:
-        if not con.is_connected():
-            con.reconnect()
-
-        cursor = con.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM tst0_reservas ORDER BY Id_Reserva DESC")
-        registros = cursor.fetchall()
-        return jsonify(registros)
-    finally:
-        cursor.close()
-        con.close()
-
-# Ruta para registrar datos en la tabla `tst0_reservas`
 @app.route("/registrar", methods=["GET"])
 def registrar():
     args = request.args
@@ -59,6 +7,9 @@ def registrar():
 
     if not nombre_apellido or not telefono:
         return jsonify({"error": "Nombre y teléfono son requeridos"}), 400
+
+    # Imprimir los valores para depurar
+    print(f"Nombre: {nombre_apellido}, Teléfono: {telefono}")
 
     try:
         if not con.is_connected():
@@ -86,6 +37,3 @@ def registrar():
     finally:
         cursor.close()
         con.close()
-
-if __name__ == "__main__":
-    app.run(debug=True)
