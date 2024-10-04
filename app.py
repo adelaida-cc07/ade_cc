@@ -66,7 +66,7 @@ def registrar():
 
         cursor = con.cursor()
         sql = "INSERT INTO tst0_reservas (Nombre_Apellido, Telefono, Fecha) VALUES (%s, %s, %s)"
-        val = (nombre_apellido, telefono, datetime.datetime.now(pytz.timezone("America/Matamoros")))
+        val = (nombre_apellido, telefono, fecha.datetime.now(pytz.timezone("America/Matamoros")))
         cursor.execute(sql, val)
         con.commit()
 
