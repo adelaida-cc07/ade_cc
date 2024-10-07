@@ -42,31 +42,31 @@ def buscar():
             con.reconnect()
 
         cursor = con.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM tst0_reservas ORDER BY Id_Reserva DESC")
+        cursor.execute("SELECT * FROM tst0_tareas ORDER BY Id_Tarea DESC")
         registros = cursor.fetchall()
         return jsonify(registros)
     finally:
         cursor.close()
         con.close()
 
-# Ruta para registrar datos en la tabla `tst0_reservas`
+# Ruta para registrar datos en la tabla `tst0_tareas`
 @app.route("/registrar", methods=["GET"])
 def registrar():
     args = request.args
 
-    nombre_apellido = args.get("name")
-    telefono = args.get("tel")
+    titulo= args.get("name")
+    descripcion= args.get("des")
 
-    if not nombre_apellido or not telefono:
-        return jsonify({"error": "Nombre y teléfono son requeridos"}), 400
+    if not titulo or not descripcion:
+        return jsonify({"error": "titulo son requeridos"}), 400
 
     try:
         if not con.is_connected():
             con.reconnect()
 
         cursor = con.cursor()
-        sql = "INSERT INTO tst0_reservas (Nombre_Apellido, Telefono, Fecha) VALUES (%s, %s, %s)"
-        val = (nombre_apellido, telefono, fecha.datetime.now(pytz.timezone("America/Matamoros")))
+        sql = "INSERT INTO tst0_tareas (titulo, descripcion) VALUES (%s, %s)"
+        val = (titulo,descripcion)
         cursor.execute(sql, val)
         con.commit()
 
@@ -78,9 +78,9 @@ def registrar():
             cluster="us2",
             ssl=True
         )
-        pusher_client.trigger("canalRegistrosHabitacion", "eventoRegistrosHabitacion", {"name": nombre_apellido, "tel": telefono})
+        pusher_client.trigger("canalRegistroTareas", "eventoRegistrosTareas", {"name": titulo, "des": descripcion})
 
-        return jsonify({"name": nombre_apellido, "tel": telefono}), 201
+        return jsonify({"name": titulo, "des": descripcion}), 201
     except mysql.connector.Error as err:
         return jsonify({"error": str(err)}), 500
     finally:
