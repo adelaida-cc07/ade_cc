@@ -18,12 +18,11 @@
       <table class="table table-sm">
         <thead>
           <tr>
-            <th>Nombre_Apellido</th>
-            <th>Telefono</th>
-            <th>Fecha</th>
+            <th>Titulo</th>
+            <th>Descripcion</th>
           </tr>
         </thead>
-        <tbody id="tbodyReserva_Habitacion"></tbody>
+        <tbody id="tbody"></tbody>
       </table>
     </div>
 
@@ -37,14 +36,13 @@
                     // Imprimimos la respuesta de FLASK con SELECT para saber cómo acceder a cada valor y colocarlos en el TBODY
                     // console.log(respuesta)
 
-                    $("#tbodyReserva_Habitacion").html("")
+                    $("#tbodyTareas").html("")
 
                     for (var x in respuesta) {
                         var reserva_habitacion = respuesta[x]
-                        $("#tbodyReserva_Habitacion").append(`<tr>
-                            <td>${reserva_habitacion[1]}</td>
-                            <td>${reserva_habitacion[2]}</td>
-                            <td>${reserva_habitacion[3]}</td>
+                        $("#tbodyTareas").append(`<tr>
+                            <td>${tareas[1]}</td>
+                            <td>${tareas[2]}</td>
                         </tr>`)
                     }
                 })
@@ -59,10 +57,10 @@
             })
 
             // Canal ---> Donde se concentran los hilos con los clientes conectados
-            var channel = pusher.subscribe("canalRegistrosHabitacion");
+            var channel = pusher.subscribe("canalRegistrosTareas");
 
             // Evento --> El código que se accionará con la información enviada o el uso del canal
-            channel.bind("eventoRegistrosHabitacion", function (reserva_habitacion) {
+            channel.bind("eventoRegistrosTareas", function (tareas) {
                 // 1. Notificar el evento
                 // alert("Ocurrió el evento")
 
