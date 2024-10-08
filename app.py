@@ -54,8 +54,8 @@ def buscar():
 def registrar():
     args = request.args
 
-    titulo= args.get("name")
-    descripcion= args.get("des")
+    Titulo= args.get("name")
+    Descripcion= args.get("des")
 
     if not titulo or not descripcion:
         return jsonify({"error": "titulo son requeridos"}), 400
@@ -66,7 +66,7 @@ def registrar():
 
         cursor = con.cursor()
         sql = "INSERT INTO tst0_tareas (titulo, descripcion) VALUES (%s, %s)"
-        val = (titulo,descripcion)
+        val = (Titulo,Descripcion)
         cursor.execute(sql, val)
         con.commit()
 
@@ -80,7 +80,7 @@ def registrar():
         )
         pusher_client.trigger("canalRegistroTareas", "eventoRegistrosTareas", {"name": titulo, "des": descripcion})
 
-        return jsonify({"name": titulo, "des": descripcion}), 201
+        return jsonify({"name": Titulo, "des": Descripcion}), 201
     except mysql.connector.Error as err:
         return jsonify({"error": str(err)}), 500
     finally:
