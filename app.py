@@ -1,91 +1,83 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request
 import pusher
 import mysql.connector
-import datetime
 import pytz
 
-# Conexión a la base de datos
 con = mysql.connector.connect(
-    host="185.232.14.52",
-    database="u760464709_tst_sep",
-    user="u760464709_tst_sep_usr",
-    password="dJ0CIAFF="
+  host="185.232.14.52",
+  database="u760464709_tst_sep",
+  user="u760464709_tst_sep_usr",
+  password="dJ0CIAFF="
 )
 
 app = Flask(__name__)
 
-# Ruta de inicio
+# Ruta principal que sirve una página de inicio
 @app.route("/")
 def index():
-    con.close()
     return render_template("app.html")
 
-# Ruta para mostrar la vista de 'alumnos'
+# Ruta que sirve la página de alumnos
 @app.route("/app")
 def alumnos():
-    con.close()
     return render_template("app.html")
 
-# Ruta POST para guardar información de alumnos (ejemplo)
+# Ruta para guardar los datos de los alumnos enviados desde el formulario
 @app.route("/app/guardar", methods=["POST"])
-def alumnos_guardar():
-    con.close()
-    matricula = request.form.get("txtMatriculaFA")
-    nombreapellido = request.form.get("txtNombreApellidoFA")
-    return f"Matrícula {matricula} Nombre y Apellido {nombreapellido}"
+def alumnosGuardar():
+    nombreapellido = request.form["name"]
+    comentario = request.form["comment"]
+    calificacion = request.form["rating"]
 
-# Ruta para buscar registros de la tabla tst0_reservas
+    # Devolviendo una respuesta con los datos recibidos
+    return f"Nombre: {nombreapellido}, Comentario: {comentario}, Calificación: {calificacion}"
+#buscar
 @app.route("/buscar")
 def buscar():
-    try:
-        if not con.is_connected():
-            con.reconnect()
+    if not con.is_connected():
+        con.reconnect()
+    cursor = con.cursor()
+    cursor.execute("SELECT * FROM tst0_experiencias ORDER BY Id_Experiencia DESC")
 
-        cursor = con.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM tst0_tareas ORDER BY Id_Tarea DESC")
-        registros = cursor.fetchall()
-        return jsonify(registros)
-    finally:
-        cursor.close()
-        con.close()
+    registros = cursor.fetchall()
+    con.close()
 
-# Ruta para registrar datos en la tabla tst0_tareas
+    return registros
+
 @app.route("/registrar", methods=["GET"])
 def registrar():
-    args = request.args
+    args = request.args  # Obtener los parámetros desde la URL
 
-    titulo= args.get("name")
-    descripcion= args.get("des")
+    if not con.is_connected():
+        con.reconnect()
 
-    if not titulo or not descripcion:
-        return jsonify({"error": "titulo son requeridos"}), 400
+    cursor = con.cursor()
 
-    try:
-        if not con.is_connected():
-            con.reconnect()
+    # SQL para insertar los datos en la tabla 'tst0_experiencias'
+    sql = "INSERT INTO tst0_experiencias (Nombre_Apellido, Comentario, Calificacion) VALUES (%s, %s, %s)"
+    
+    # Valores obtenidos de los parámetros en la URL (por ejemplo: ?name=Juan&comment=Buen+trabajo&rating=5)
+    val = (args.get("name"), args.get("comment"), args.get("rating"))
+    
+    cursor.execute(sql, val)
+    con.commit()
+    
+    cursor.close()
+    con.close()
 
-        cursor = con.cursor()
-        sql = "INSERT INTO tst0_tareas (titulo, descripcion) VALUES (%s, %s)"
-        val = (titulo,descripcion)
-        cursor.execute(sql, val)
-        con.commit()
 
-        # Trigger para Pusher
-        pusher_client = pusher.Pusher(
-            app_id="1766039",
-            key="91998889612f4dcea6e7",
-            secret="b0b6a2508a63ef44c370",
-            cluster="us2",
-            ssl=True
-        )
-        pusher_client.trigger("canalRegistroTareas", "eventoRegistrosTareas", {"name": titulo, "des": descripcion})
+    # Conexión con Pusher utilizando las credenciales correctas
+    pusher_client = pusher.Pusher(
+        app_id="1766032",
+        key="e7b4efacf7381f83e05e",
+        secret="134ff4754740b57ad585",
+        cluster="us2",
+        ssl=True
+    )
 
-        return jsonify({"name": titulo, "des": descripcion}), 201
-    except mysql.connector.Error as err:
-        return jsonify({"error": str(err)}), 500
-    finally:
-        cursor.close()
-        con.close()
+    # Disparando un evento a través de Pusher
+    pusher_client.trigger("canalRegistroEncuesta", "registroEventoEncuests", args)
+  #    pusher_client.trigger("my-channel", "my-event", args)
 
-if __name__ == "__main__":
-    app.run(debug=True)
+    
+    return args
