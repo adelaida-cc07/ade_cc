@@ -25,19 +25,19 @@ def alumnos():
 # Ruta para guardar los datos de los alumnos enviados desde el formulario
 @app.route("/app/guardar", methods=["POST"])
 def alumnosGuardar():
-    nombreapellido = request.form["name"]
-    comentario = request.form["comment"]
-    calificacion = request.form["rating"]
+    Titulo = request.form["name"]
+    Descripcion = request.form["desc"]
+  
 
     # Devolviendo una respuesta con los datos recibidos
-    return f"Nombre: {nombreapellido}, Comentario: {comentario}, Calificación: {calificacion}"
+    return f"Titulo: {titulo}, Descripcion: {descripcion}"
 #buscar
 @app.route("/buscar")
 def buscar():
     if not con.is_connected():
         con.reconnect()
     cursor = con.cursor()
-    cursor.execute("SELECT * FROM tst0_experiencias ORDER BY Id_Experiencia DESC")
+    cursor.execute("SELECT * FROM tst0_tareas ORDER BY Id_Tarea DESC")
 
     registros = cursor.fetchall()
     con.close()
@@ -53,11 +53,11 @@ def registrar():
 
     cursor = con.cursor()
 
-    # SQL para insertar los datos en la tabla 'tst0_experiencias'
-    sql = "INSERT INTO tst0_experiencias (Nombre_Apellido, Comentario, Calificacion) VALUES (%s, %s, %s)"
+    # SQL para insertar los datos en la tabla 'tst0_tareas'
+    sql = "INSERT INTO tst0_tareas (Titulo, Descripcion) VALUES (%s, %s, %s)"
     
     # Valores obtenidos de los parámetros en la URL (por ejemplo: ?name=Juan&comment=Buen+trabajo&rating=5)
-    val = (args.get("name"), args.get("comment"), args.get("rating"))
+    val = (args.get("name"), args.get("desc"))
     
     cursor.execute(sql, val)
     con.commit()
@@ -68,15 +68,15 @@ def registrar():
 
     # Conexión con Pusher utilizando las credenciales correctas
     pusher_client = pusher.Pusher(
-        app_id="1766032",
-        key="e7b4efacf7381f83e05e",
-        secret="134ff4754740b57ad585",
-        cluster="us2",
-        ssl=True
+      app_id = "1766039"
+    key = "91998889612f4dcea6e7"
+    secret = "b0b6a2508a63ef44c370"
+    cluster = "us2"
+    ssl=True
     )
 
     # Disparando un evento a través de Pusher
-    pusher_client.trigger("canalRegistroEncuesta", "registroEventoEncuests", args)
+    pusher_client.trigger("canalRegistroTarea", "registroEventoTareas", args)
   #    pusher_client.trigger("my-channel", "my-event", args)
 
     
