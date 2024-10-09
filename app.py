@@ -22,7 +22,7 @@ def index():
 def alumnos():
     return render_template("app.html")
 
-# Ruta para guardar los datos de los alumnos enviados desde el formulario
+# Ruta para guardar los datos  enviados desde el formulario
 @app.route("/app/guardar", methods=["POST"])
 def alumnosGuardar():
     Titulo = request.form["titulo"]
