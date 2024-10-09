@@ -57,7 +57,7 @@ def registrar():
     sql = "INSERT INTO tst0_tareas (Titulo, Descripcion) VALUES (%s, %s, %s)"
     
     # Valores obtenidos de los parámetros en la URL (por ejemplo: ?name=Juan&comment=Buen+trabajo&rating=5)
-    val = (args.get("titulo"), args.get("descrpicion"))
+    val = (args.get("titulo"), args.get("descripcion"))
     
     cursor.execute(sql, val)
     con.commit()
