@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Encuesta de Experiencia</title>
+    <title>APP</title>
 
     <!-- Pusher JS -->
     <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
@@ -28,12 +28,11 @@
         <table class="table table-sm">
             <thead>
                 <tr>
-                    <th>Nombre y Apellido</th>
-                    <th>Comentario</th>
-                    <th>Calificación</th>
+                    <th>Titulo</th>
+                    <th>Descripcion</th>
                 </tr>
             </thead>
-            <tbody id="tbodyEncuestas"></tbody>
+            <tbody id="tbodyTarea"></tbody>
         </table>
     </div>
 
@@ -42,15 +41,14 @@
             // Realizamos un SELECT a la BD con FLASK y lo imprimimos en el TBODY
             function buscar() {
                 $.get("/buscar", function (respuesta) {
-                    $("#tbodyEncuestas").html(""); // Limpiamos el contenido de la tabla
+                    $("#tbodyTarea").html(""); // Limpiamos el contenido de la tabla
 
                     // Recorremos la respuesta y llenamos el cuerpo de la tabla
                     for (var x in respuesta) {
-                        var encuesta = respuesta[x];
-                        $("#tbodyEncuestas").append(`<tr>
-                            <td>${encuesta[1]}</td>
-                            <td>${encuesta[2]}</td>
-                            <td>${encuesta[3]}</td>
+                        var tarea = respuesta[x];
+                        $("#tbodyTarea").append(`<tr>
+                            <td>${tarea[1]}</td>
+                            <td>${tarea[2]}</td>
                         </tr>`);
                     }
                 });
@@ -61,15 +59,15 @@
             // Configurar Pusher
             Pusher.logToConsole = true;
             
-            var pusher = new Pusher("e7b4efacf7381f83e05e", {
+            var pusher = new Pusher("91998889612f4dcea6e7", {
                 cluster: "us2"
             });
 
             // Suscribirse al canal de Pusher
-            var channel = pusher.subscribe("canalRegistroEncuesta");
+            var channel = pusher.subscribe("canalRegistroTarea");
 
             // Escuchar el evento que actualiza los registros en tiempo real
-            channel.bind("registroEventoEncuests", function () {
+            channel.bind("registroEventoTareas", function () {
                 buscar(); // Actualizar la tabla cuando se reciba un nuevo evento
             });
         });
