@@ -53,15 +53,18 @@ def buscar():
         con.close()
 
 # Ruta para registrar datos en la tabla `tst0_tareas`
-@app.route("/registrar", methods=["GET"])
-def registrar():
-    args = request.args
+@app.route("/buscar")
+def buscar():
+    if not con.is_connected():
+        con.reconnect()
 
-    Titulo= args.get("name")
-    Descripcion= args.get("des")
+    cursor = con.cursor()
+    cursor.execute("SELECT * FROM tst0_tareas ORDER BY Id_Tarea DESC")
+    registros = cursor.fetchall()
 
-    if not titulo or not descripcion:
-        return jsonify({"error": "titulo son requeridos"}), 400
+    con.close()
+
+    return registros
 
     try:
         if not con.is_connected():
