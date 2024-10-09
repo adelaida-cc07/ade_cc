@@ -34,37 +34,31 @@ def alumnos_guardar():
     nombreapellido = request.form.get("txtNombreApellidoFA")
     return f"Matrícula {matricula} Nombre y Apellido {nombreapellido}"
 
-# Ruta para buscar registros de la tabla `tst0_tareas`
+# Ruta para buscar registros de la tabla tst0_reservas
 @app.route("/buscar")
 def buscar():
-    if not con.is_connected():
-        con.reconnect()
-    cursor = con.cursor()
-    cursor.execute("SELECT * FROM tst0_tareas ORDER BY Id_Tarea DESC")
+    try:
+        if not con.is_connected():
+            con.reconnect()
 
-    registros = cursor.fetchall()
-    con.close()
-
-    return registros
-
-    return make_response(jsonify(registros))
+        cursor = con.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM tst0_tareas ORDER BY Id_Tarea DESC")
+        registros = cursor.fetchall()
+        return jsonify(registros)
     finally:
         cursor.close()
         con.close()
 
-# Ruta para registrar datos en la tabla `tst0_tareas`
-@app.route("/buscar")
-def buscar():
-    if not con.is_connected():
-        con.reconnect()
+# Ruta para registrar datos en la tabla tst0_tareas
+@app.route("/registrar", methods=["GET"])
+def registrar():
+    args = request.args
 
-    cursor = con.cursor()
-    cursor.execute("SELECT * FROM tst0_tareas ORDER BY Id_Tarea DESC")
-    registros = cursor.fetchall()
+    titulo= args.get("name")
+    descripcion= args.get("des")
 
-    con.close()
-
-    return registros
+    if not titulo or not descripcion:
+        return jsonify({"error": "titulo son requeridos"}), 400
 
     try:
         if not con.is_connected():
@@ -72,7 +66,7 @@ def buscar():
 
         cursor = con.cursor()
         sql = "INSERT INTO tst0_tareas (titulo, descripcion) VALUES (%s, %s)"
-        val = (Titulo,Descripcion)
+        val = (titulo,descripcion)
         cursor.execute(sql, val)
         con.commit()
 
@@ -86,7 +80,7 @@ def buscar():
         )
         pusher_client.trigger("canalRegistroTareas", "eventoRegistrosTareas", {"name": titulo, "des": descripcion})
 
-        return jsonify({"name": Titulo, "des": Descripcion}), 201
+        return jsonify({"name": titulo, "des": descripcion}), 201
     except mysql.connector.Error as err:
         return jsonify({"error": str(err)}), 500
     finally:
