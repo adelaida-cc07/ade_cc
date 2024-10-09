@@ -57,7 +57,7 @@ def registrar():
     sql = "INSERT INTO tst0_tareas (Titulo, Descripcion) VALUES (%s, %s, %s)"
     
     # Valores obtenidos de los parámetros en la URL (por ejemplo: ?name=Juan&comment=Buen+trabajo&rating=5)
-    val = (args.get("name"), args.get("desc"))
+    val = (args.get("titulo"), args.get("descrpicion"))
     
     cursor.execute(sql, val)
     con.commit()
@@ -68,7 +68,7 @@ def registrar():
 
     # Conexión con Pusher utilizando las credenciales correctas
     pusher_client = pusher.Pusher(
-      app_id = "1766039"
+    app_id = "1766039"
     key = "91998889612f4dcea6e7"
     secret = "b0b6a2508a63ef44c370"
     cluster = "us2"
