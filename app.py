@@ -25,8 +25,8 @@ def alumnos():
 # Ruta para guardar los datos de los alumnos enviados desde el formulario
 @app.route("/app/guardar", methods=["POST"])
 def alumnosGuardar():
-    Titulo = request.form["name"]
-    Descripcion = request.form["desc"]
+    Titulo = request.form["titulo"]
+    Descripcion = request.form["descripcion"]
   
 
     # Devolviendo una respuesta con los datos recibidos
@@ -35,7 +35,7 @@ def alumnosGuardar():
 @app.route("/buscar")
 def buscar():
     if not con.is_connected():
-        con.reconnect()
+    con.reconnect()
     cursor = con.cursor()
     cursor.execute("SELECT * FROM tst0_tareas ORDER BY Id_Tarea DESC")
 
@@ -49,7 +49,7 @@ def registrar():
     args = request.args  # Obtener los parámetros desde la URL
 
     if not con.is_connected():
-        con.reconnect()
+    con.reconnect()
 
     cursor = con.cursor()
 
