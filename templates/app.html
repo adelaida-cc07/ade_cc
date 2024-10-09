@@ -41,8 +41,8 @@
                     for (var x in respuesta) {
                         var tareas = respuesta[x]
                         $("#tbodyTareas").append(`<tr>
-                            <td>${tareas["Titulo"]}</td>
-                            <td>${tareas["Descripcion"]}</td>
+                            <td>${tareas[1]}</td>
+                            <td>${tareas[2]}</td>
                         </tr>`)
                     }
                 })
