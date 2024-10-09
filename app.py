@@ -35,9 +35,9 @@ def alumnosGuardar():
 @app.route("/buscar")
 def buscar():
     if not con.is_connected():
-    con.reconnect()
-    cursor = con.cursor()
-    cursor.execute("SELECT * FROM tst0_tareas ORDER BY Id_Tarea DESC")
+      con.reconnect()
+      cursor = con.cursor()
+      cursor.execute("SELECT * FROM tst0_tareas ORDER BY Id_Tarea DESC")
 
     registros = cursor.fetchall()
     con.close()
@@ -49,7 +49,7 @@ def registrar():
     args = request.args  # Obtener los parámetros desde la URL
 
     if not con.is_connected():
-    con.reconnect()
+      con.reconnect()
 
     cursor = con.cursor()
 
@@ -68,16 +68,16 @@ def registrar():
 
     # Conexión con Pusher utilizando las credenciales correctas
     pusher_client = pusher.Pusher(
-    app_id = "1766039"
-    key = "91998889612f4dcea6e7"
-    secret = "b0b6a2508a63ef44c370"
-    cluster = "us2"
-    ssl=True
+      app_id = "1766039"
+      key = "91998889612f4dcea6e7"
+      secret = "b0b6a2508a63ef44c370"
+      cluster = "us2"
+      ssl=True
     )
 
     # Disparando un evento a través de Pusher
     pusher_client.trigger("canalRegistroTarea", "registroEventoTareas", args)
-  #    pusher_client.trigger("my-channel", "my-event", args)
+    # pusher_client.trigger("my-channel", "my-event", args)
 
     
     return args
