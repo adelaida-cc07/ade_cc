@@ -34,18 +34,20 @@ def alumnos_guardar():
     nombreapellido = request.form.get("txtNombreApellidoFA")
     return f"Matrícula {matricula} Nombre y Apellido {nombreapellido}"
 
-# Ruta para buscar registros de la tabla `tst0_reservas`
+# Ruta para buscar registros de la tabla `tst0_tareas`
 @app.route("/buscar")
 def buscar():
-    try:
-        if not con.is_connected():
-            con.reconnect()
+    if not con.is_connected():
+        con.reconnect()
+    cursor = con.cursor()
+    cursor.execute("SELECT * FROM tst0_tareas ORDER BY Id_Tarea DESC")
 
-        cursor = con.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM tst0_tareas ORDER BY Id_Tarea DESC")
-        registros = cursor.fetchall()
-        print(f"Registros recuperados: {registros}") 
-        return jsonify(registros)
+    registros = cursor.fetchall()
+    con.close()
+
+    return registros
+
+    return make_response(jsonify(registros))
     finally:
         cursor.close()
         con.close()
