@@ -44,6 +44,7 @@ def buscar():
         cursor = con.cursor(dictionary=True)
         cursor.execute("SELECT * FROM tst0_tareas ORDER BY Id_Tarea DESC")
         registros = cursor.fetchall()
+        print(f"Registros recuperados: {registros}") 
         return jsonify(registros)
     finally:
         cursor.close()
