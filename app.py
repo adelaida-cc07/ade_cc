@@ -3,6 +3,7 @@ import pusher
 import mysql.connector
 import pytz
 
+
 # Conexión a la base de datos
 con = mysql.connector.connect(
   host="185.232.14.52",
@@ -12,6 +13,7 @@ con = mysql.connector.connect(
 )
 
 app = Flask(__name__)
+CORS(app)
 
 # Ruta principal que sirve una página de inicio
 @app.route("/")
