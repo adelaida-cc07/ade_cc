@@ -3,4 +3,3 @@ Gunicorn
 pusher
 mysql-connector-python
 pytz
-Flask -Cors
