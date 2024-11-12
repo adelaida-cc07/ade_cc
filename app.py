@@ -12,7 +12,7 @@ con = mysql.connector.connect(
 
 # Inicialización de Flask
 app = Flask(__name__)
-CORS(app)
+
 
 # Ruta principal
 @app.route("/")
